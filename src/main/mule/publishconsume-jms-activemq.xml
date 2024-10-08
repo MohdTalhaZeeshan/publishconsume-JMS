@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="f815e048-8340-4d1d-9613-ed4080c8c1e9" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<jms:config name="JMS_Config" doc:name="JMS Config" doc:id="a7976775-8020-4d88-8abb-60eb6991bda4" >
+		<jms:active-mq-connection username="admin" password="admin" >
+			<jms:factory-configuration brokerUrl="tcp://localhost:61616" />
+		</jms:active-mq-connection>
+	</jms:config>
+	<flow name="publishconsume-jms-activemqFlow" doc:id="99fef883-7f22-4a71-b1d0-df9a3574cbe3" >
+		<http:listener doc:name="Listener" doc:id="0b35f8c2-11ad-4bb3-85ff-f0b8fe466c33" path="pbcon" config-ref="HTTP_Listener_config"/>
+		<jms:publish-consume doc:name="Publish consume" doc:id="ca18932f-1b21-4f47-8f06-b13571a90b23" config-ref="JMS_Config" destination="request">
+			<jms:message >
+				<jms:reply-to destination="reply" />
+			</jms:message>
+		</jms:publish-consume>
+		<logger level="INFO" doc:name="Logger" doc:id="a8e25ca5-4f3c-4de3-94b4-afcd9225cc2c" message='#["Publish Consume"]'/>
+	</flow>
+	<flow name="publishconsume-jms-activemqFlow1" doc:id="5dcd773e-1140-438e-8543-2194b313fe95" >
+		<jms:listener doc:name="On New Message" doc:id="d7672a70-f1bc-42e2-9772-128a30f42802" config-ref="JMS_Config" destination="request"/>
+		<logger level="INFO" doc:name="Logger" doc:id="15bbed33-2d2f-42a0-b3ae-3d445cd884e1" message="#[payload]"/>
+	</flow>
+</mule>
